@@ -25,14 +25,18 @@ Optionally add a desktop launcher or a keyboard shortcut if you want.
 
 # FAQ
 
-Q: Is this literally just dumping a list of every filename in my system into a text file and running ripgrep on it?
-A: Yes.
+**Q:** Is this literally just dumping a list of every filename in my system into a text file and running ripgrep on it?
 
-Q: But isn't using a real database and incremental search more efficient?
-A: Yes. But it's also not happening in 50 lines of python.
+**A:** Yes.
 
-Q: Why did you use ugly old TK instead of a modern framework like QT / GTK / Electron?
-A: They're not in the standard library and they're not happening in 50 lines of python.
+**Q:** But isn't using a real database and incremental search more efficient?
 
-Q: Is this a *good* tool?
-A: It's an effective tool.
+**A:** Yes. But it's also not happening in 50 lines of python.
+
+**Q:** Why did you use ugly old TK instead of a modern framework like QT / GTK / Electron?
+
+**A:** They're not in the standard library and they're not happening in 50 lines of python.
+
+**Q:** Is this a *good* tool?
+
+**A:** It's an effective tool.
