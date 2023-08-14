@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+import tkinter as tk
+from subprocess import run, Popen, CalledProcessError
+
+# Create the window and widgets
+window = tk.Tk()
+window.title("Quicksearch")
+window.geometry("800x400")
+input_var = tk.StringVar()
+input_entry = tk.Entry(window, textvariable=input_var)
+input_entry.pack(fill=tk.X)
+input_entry.focus_set()
+output_listbox = tk.Listbox(window)
+output_listbox.pack(fill=tk.BOTH, expand=True)
+
+# Hook up keyboard shortcuts
+window.bind("<Escape>", lambda _: window.destroy())
+window.bind("<Control-u>", lambda _: input_var.set(""))
+input_entry.bind("<Up>", lambda _: output_listbox.focus_set())
+input_entry.bind("<Down>", lambda _: output_listbox.focus_set())
+
+def search(*_):
+    command = f"rg -m 500 -N '{input_var.get()}' ~/.searchindex"
+    try:
+        output = run(command, shell=True, capture_output=True, text=True)
+        output_listbox.delete(0, tk.END)  # Clear previous outputs
+        for line in output.stdout.splitlines():
+            output_listbox.insert(tk.END, line)
+    except CalledProcessError as e:
+        output_listbox.delete(0, tk.END)  # Clear previous outputs
+        output_listbox.insert(tk.END, f"Command returned non-zero exit status: {e.returncode}")
+    except Exception as e:
+        output_listbox.delete(0, tk.END)  # Clear previous outputs
+        output_listbox.insert(tk.END, f"An error occurred: {e}")
+input_var.trace_add("write", search)
+
+def open_file(_):
+    selected_index = output_listbox.curselection()
+    if selected_index:
+        selected_item = output_listbox.get(selected_index)
+        try:
+            Popen(["xdg-open", selected_item])
+        except CalledProcessError as e:
+            output_listbox.insert(tk.END, f"Error opening file with xdg-open: {e}")
+        window.destroy()
+output_listbox.bind("<Double-Button-1>", open_file)
+output_listbox.bind("<Return>", open_file)
+
+window.mainloop()
