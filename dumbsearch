@@ -2,7 +2,7 @@
 import tkinter as tk
 from subprocess import run, Popen, CalledProcessError
 
-helptext = "Start typing to search. Run 'find / > ~/.searchindex' to rebuild the index."
+helptext = "Start typing to search. Press Alt+R to rebuild the index."
 
 # Create the window and widgets
 window = tk.Tk()
@@ -19,6 +19,7 @@ def message(text):
     output_listbox.delete(0, tk.END)
     output_listbox.insert(tk.END, text)
     output_listbox.itemconfig(0, {"fg": "grey"})
+    window.update()
 message(helptext)
 
 # Hook up keyboard shortcuts
@@ -57,5 +58,14 @@ def open_file(_):
         window.destroy()
 output_listbox.bind("<Double-Button-1>", open_file)
 output_listbox.bind("<Return>", open_file)
+
+def rebuild_index(_):
+    message("Rebuilding search index. This might take some time ...")
+    try:
+        output = run("find / > ~/.searchindex", shell=True, capture_output=True, text=True)
+        message("Indexing complete")
+    except CalledProcessError as e:
+        message("Indexing failed. Error contents {output.stderr}")
+input_entry.bind("<Alt-r>", rebuild_index)
 
 window.mainloop()
