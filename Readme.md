@@ -29,13 +29,13 @@ Optionally add a desktop launcher or a keyboard shortcut if you want.
 
 **A:** Yes.
 
-**Q:** But isn't using a real database and incremental search more efficient?
+**Q:** But isn't using a real data structure and incremental search more efficient?
 
-**A:** Yes. But it's also not happening in 60 lines of python.
+**A:** That's actually not guaranteed on modern hardware. Searching a continuous block of memory is very friendly to CPU cache, the branch predictor and vectorization. Pointer chasing around a data structure is not. Subjectively this program has felt faster than any other search tool on every machine I've tested it on.
 
 **Q:** Why did you use ugly old TK instead of a modern framework like QT / GTK / Electron?
 
-**A:** They're not in the standard library and they're not happening in 60 lines of python.
+**A:** They're not in the standard library and they're not happening in 100 lines of python.
 
 **Q:** Is this a *good* tool?
 

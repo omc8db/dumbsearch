@@ -1,8 +1,26 @@
 #!/usr/bin/env python3
 import tkinter as tk
 from subprocess import run, Popen, CalledProcessError
+import os
 
-helptext = "Start typing to search. Press Alt+R to rebuild the index."
+helptext = """Start typing to search. 
+Keybindings:
+    Alt+R  : rebuild the index.
+    Ctrl+c : copy path to clipboard
+    Ctrl+f : open parent folder
+"""
+
+# Don't index these real folders because they add a ton of useless noise entries
+SKIP_INDEX = ' '.join([f"-not -path '{x}/*'" for x in [
+    '/tmp',
+    '/var/lib/flatpak',
+    '/var/tmp',
+    '/home/*/.var/app',
+    '/home/*/.cache',
+    '*/.git',
+]])
+
+
 
 # Create the window and widgets
 window = tk.Tk()
@@ -17,8 +35,9 @@ output_listbox.pack(fill=tk.BOTH, expand=True)
 
 def message(text):
     output_listbox.delete(0, tk.END)
-    output_listbox.insert(tk.END, text)
-    output_listbox.itemconfig(0, {"fg": "grey"})
+    for i, line in enumerate(text.split('\n')):
+        output_listbox.insert(tk.END, line)
+        output_listbox.itemconfig(i, {"fg": "grey"})
     window.update()
 message(helptext)
 
@@ -47,25 +66,33 @@ def search(*_):
         message(f"An error occurred: {e}")
 input_var.trace_add("write", search)
 
-def open_file(_):
+def open_file(folder=False, clipboard=False):
     selected_index = output_listbox.curselection()
     if selected_index:
-        selected_item = output_listbox.get(selected_index)
+        fname = output_listbox.get(selected_index)
+        if folder:
+            fname = os.path.dirname(fname)
+        if clipboard:
+            window.clipboard_clear()
+            window.clipboard_append(fname)
+            return
         try:
-            Popen(["xdg-open", selected_item])
+            Popen(["xdg-open", fname])
         except CalledProcessError as e:
             output_listbox.insert(tk.END, f"Error opening file with xdg-open: {e}")
         window.destroy()
-output_listbox.bind("<Double-Button-1>", open_file)
-window.bind("<Return>", open_file)
+output_listbox.bind("<Double-Button-1>", lambda _: open_file())
+window.bind("<Return>", lambda _: open_file())
+window.bind("<Control-c>", lambda _: open_file(clipboard=True))
+window.bind("<Control-f>", lambda _: open_file(folder=True))
 
 def rebuild_index(_):
     message("Rebuilding search index. This might take some time ...")
     try:
-        output = run("find / > ~/.searchindex", shell=True, capture_output=True, text=True)
+        output = run(f"find / -mount {SKIP_INDEX} > ~/.searchindex", shell=True, capture_output=True, text=True)
         message("Indexing complete")
     except CalledProcessError as e:
-        message("Indexing failed. Error contents {output.stderr}")
+        message(f"Indexing failed. Error contents {output.stderr}")
 input_entry.bind("<Alt-r>", rebuild_index)
 
 window.mainloop()
