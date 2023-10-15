@@ -1,5 +1,7 @@
 # Dumbsearch, a simple file search tool for Linux similar to Everything Search
 
+![](demo.gif)
+
 Everything file search for Windows is wonderful - instant search as you type for filenames.
 
 There are a few similar projects for Linux.
