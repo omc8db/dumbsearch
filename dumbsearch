@@ -50,7 +50,7 @@ def search(*_):
     if not input_var.get():
         message(helptext)
         return
-    command = f"rg -i -m 500 -N '{input_var.get()}' ~/.searchindex"
+    command = f"rg -i -m 500 -NI '{input_var.get()}' ~/.searchindex*"
     try:
         output = run(command, shell=True, capture_output=True, text=True)
         output_listbox.delete(0, tk.END)  # Clear previous outputs
@@ -89,7 +89,7 @@ window.bind("<Control-f>", lambda _: open_file(folder=True))
 def rebuild_index(_):
     message("Rebuilding search index. This might take some time ...")
     try:
-        output = run(f"find / -mount {SKIP_INDEX} > ~/.searchindex", shell=True, capture_output=True, text=True)
+        output = run(f"find / -mount {SKIP_INDEX} | split -C 10M - ~/.searchindex", shell=True, capture_output=True, text=True)
         message("Indexing complete")
     except CalledProcessError as e:
         message(f"Indexing failed. Error contents {output.stderr}")
